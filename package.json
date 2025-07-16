@@ -1,5 +1,5 @@
 {
-  "name": "BetterChat",
+  "name": "SnapTweak",
   "version": "1.5.0",
   "description": "Screenshot Freely, Save Media, Bypass Presence Detection and more!",
   "scripts": {
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dclstn/better-chat.git"
+    "url": "git+https://github.com/mixtapejaxson/SnapTweak.git"
   },
   "author": "donnieacolston@gmail.com",
   "license": "ISC",
