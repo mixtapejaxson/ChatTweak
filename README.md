@@ -32,7 +32,7 @@ Screenshot Freely, Save Media, Bypass Presence Detection and more!
 
 You can install **SnapTweak** via the User-Script with a tool like [Tampermonkey](https://www.tampermonkey.net/).
 
-For [Tampermonkey](https://www.tampermonkey.net/) it's recommended you set Security > Content Script API to `UserScripts API Dynamic`, for BetterChat to be injected reliably.
+For [Tampermonkey](https://www.tampermonkey.net/) it's recommended you set Security > Content Script API to `UserScripts API Dynamic`, for SnapTweak to be injected reliably.
 
 ## How to Contribute
 
