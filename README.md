@@ -1,6 +1,6 @@
 ![Extension menu preview](https://github.com/user-attachments/assets/be8f5858-4f11-43f0-ad09-28f5e2c1ddb2)
 
-## BetterChat
+## SnapTweak
 
 ![Node CI badge](https://github.com/dclstn/better-chat/actions/workflows/node.js.yml/badge.svg)
 [![Discord Badge](https://dcbadge.limes.pink/api/server/https://discord.gg/hpmjAJZR3H?style=flat)](https://discord.gg/hpmjAJZR3H)
@@ -28,7 +28,7 @@ Screenshot Freely, Save Media, Bypass Presence Detection and more!
 ## How to install
 
 > [!WARNING]
-> This extension is provided "as is" without any warranties, guarantees, or assurances of reliability or compatibility. By using BetterChat, you acknowledge that you do so at your own risk, and the developers are not liable for any issues, data loss, or other consequences that may arise from its use.
+> This extension is provided "as is" without any warranties, guarantees, or assurances of reliability or compatibility. By using SnapTweak, you acknowledge that you do so at your own risk, and the developers are not liable for any issues, data loss, or other consequences that may arise from its use.
 
 ### Chromium Browsers
 
@@ -46,14 +46,14 @@ For [Tampermonkey](https://www.tampermonkey.net/) it's recommended you set Secur
 
 ## How to Contribute
 
-1. Clone or fork the respository `git@github.com:dclstn/better-chat.git`.
+1. Clone or fork the respository `git clone https://github.com/mixtapejaxson/SnapTweak.git`.
 2. Install dependencies, typically by `npm install` in the root of the directory.
 3. Run `npm start` to run the development server.
 4. Navigate to `chrome://extensions/` and enable developer-mode (top-right).
 5. Click `Load Unpacked` and add `/public` from your cloned repository.
 6. Finally, navigate to `https://www.snapchat.com/web` and any changes you make to `/src/script` will be reflected there.
 
-> Disable any other instances of BetterChat you may have running.
+> Disable any other instances of SnapTweak you may have running.
 
 ## Other stuff
 
