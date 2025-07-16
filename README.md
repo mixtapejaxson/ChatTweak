@@ -59,4 +59,3 @@ For [Tampermonkey](https://www.tampermonkey.net/) it's recommended you set Secur
 
 ["Support the Upstream"](https://www.buymeacoffee.com/dclstn)
 
-Need support? Join our [Discord](https://discord.gg/hpmjAJZR3H).
