@@ -57,6 +57,6 @@ For [Tampermonkey](https://www.tampermonkey.net/) it's recommended you set Secur
 
 ## Other stuff
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/dclstn)
+["Support the Upstream"](https://www.buymeacoffee.com/dclstn)
 
 Need support? Join our [Discord](https://discord.gg/hpmjAJZR3H).
