@@ -1,4 +1,3 @@
-![Extension menu preview](https://github.com/user-attachments/assets/be8f5858-4f11-43f0-ad09-28f5e2c1ddb2)
 
 ## SnapTweak
 
