@@ -2,11 +2,10 @@
 
 ## SnapTweak
 
-![Node CI badge](https://github.com/dclstn/better-chat/actions/workflows/node.js.yml/badge.svg)
-[![Discord Badge](https://dcbadge.limes.pink/api/server/https://discord.gg/hpmjAJZR3H?style=flat)](https://discord.gg/hpmjAJZR3H)
+![Node CI badge](https://github.com/mixtapejaxson/SnapTweak/actions/workflows/node.js.yml/badge.svg)
 
 > [!IMPORTANT]  
-> BetterChat is an independent browser extension and is **NOT affiliated with, sponsored by, or endorsed by Snap Inc. in any way**. The use of any Snap-related terms or marks in this extension is for descriptive purposes only and does not imply any association with Snap Inc. All trademarks and brand names are the property of their respective owners.
+> SnapTweak is an independent userscript and is **NOT affiliated with, sponsored by, or endorsed by Snap Inc. in any way**. The use of any Snap-related terms or marks in this extension is for descriptive purposes only and does not imply any association with Snap Inc. All trademarks and brand names are the property of their respective owners.
 
 Screenshot Freely, Save Media, Bypass Presence Detection and more!
 
