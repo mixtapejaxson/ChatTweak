@@ -30,17 +30,9 @@ Screenshot Freely, Save Media, Bypass Presence Detection and more!
 > [!WARNING]
 > This extension is provided "as is" without any warranties, guarantees, or assurances of reliability or compatibility. By using SnapTweak, you acknowledge that you do so at your own risk, and the developers are not liable for any issues, data loss, or other consequences that may arise from its use.
 
-### Chromium Browsers
-
-You can install **BetterChat** via the [Chrome Extension Store](https://chrome.google.com/webstore/detail/betterchat/bomphfefmmkghdkkpjdafehnmfpifook).
-
-### Firefox Browsers
-
-You can install **BetterChat** via the [Firefox Addon Store](https://addons.mozilla.org/firefox/addon/betterchat/).
-
 ### Other Browsers
 
-You can install **BetterChat** via the [User-Script](https://better-chat.vasp.dev/build/userscript.js) with a tool like [Tampermonkey](https://www.tampermonkey.net/).
+You can install **SnapTweak** via the User-Script with a tool like [Tampermonkey](https://www.tampermonkey.net/).
 
 For [Tampermonkey](https://www.tampermonkey.net/) it's recommended you set Security > Content Script API to `UserScripts API Dynamic`, for BetterChat to be injected reliably.
 
