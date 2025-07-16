@@ -98,9 +98,9 @@ function SettingsModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
         <Text
           className="footerText"
           component="a"
-          href={`https://github.com/dclstn/better-chat/releases/tag/v${process.env.VERSION}`}
+          href={`https://github.com/mixtapejaxson/SnapTweak/releases/tag/v${process.env.VERSION}`}
         >
-          BetterChat v{process.env.VERSION} ❤️
+          SnapTweak v{process.env.VERSION} ❤️
         </Text>
       </div>
     </Modal>
