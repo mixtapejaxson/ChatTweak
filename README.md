@@ -26,7 +26,7 @@ Screenshot Freely, Save Media, Bypass Presence Detection and more!
 ## How to install
 
 > [!WARNING]
-> This extension is provided "as is" without any warranties, guarantees, or assurances of reliability or compatibility. By using SnapTweak, you acknowledge that you do so at your own risk, and the developers are not liable for any issues, data loss, or other consequences that may arise from its use.
+> This userscript is provided "as is" without any warranties, guarantees, or assurances of reliability or compatibility. By using SnapTweak, you acknowledge that you do so at your own risk, and the developers are not liable for any issues, data loss, or other consequences that may arise from its use.
 
 ### Other Browsers
 
