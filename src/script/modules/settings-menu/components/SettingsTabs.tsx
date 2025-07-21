@@ -40,24 +40,31 @@ function SettingsTabs({ allSettings }: SettingsTabsProps) {
       let filteredSettings: SettingModule[] = [];
       switch (tabConfig.value) {
         case 'general':
-          filteredSettings = allSettings.filter((setting: SettingModule) =>
-            ['Always Present', 'Cross-Tab Support'].includes(Array.isArray(setting.name) ? setting.name[0] : setting.name)
-          );
+          filteredSettings = allSettings.filter((setting: SettingModule) => {
+            const effectiveSettingName = Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '';
+            return ['Always Present', 'Cross-Tab Support'].includes(effectiveSettingName);
+          });
           break;
         case 'chat-messaging':
-          filteredSettings = allSettings.filter((setting: SettingModule) =>
-            ['Chat Handling', 'Send Unsaveable Messages', 'Typing Animation', 'Typing Notification'].includes(Array.isArray(setting.name) ? setting.name[0] : setting.name)
-          );
+          filteredSettings = allSettings.filter((setting: SettingModule) => {
+            const effectiveSettingName = Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '';
+            return ['Chat Handling', 'Peeking Notification', 'Send Unsaveable Messages', 'Story Read Receipt', 'Typing Animation', 'Typing Notification'].includes(effectiveSettingName);
+          });
           break;
         case 'media-snaps':
-          filteredSettings = allSettings.filter((setting: SettingModule) =>
-            ['Local Save Snaps', 'Media Saving', 'Send Snaps as Mobile', 'Screenshot Prevention', 'Unlimited File Size', 'Upload Image Snaps'].includes(Array.isArray(setting.name) ? setting.name[0] : setting.name)
-          );
+          filteredSettings = allSettings.filter((setting: SettingModule) => {
+            const effectiveSettingName = Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '';
+            return ['Local Save Snaps', 'Media Saving', 'Screenshot Prevention', 'Send Snaps as Mobile', 'Unlimited File Size', 'Upload Image Snaps'].includes(effectiveSettingName);
+          });
           break;
         case 'presence-privacy':
-          filteredSettings = allSettings.filter((setting: SettingModule) =>
-            ['Bitmoji Presence', 'Peeking Notification', 'Presence Logging', 'Story Read Receipt', 'View Private Stories'].includes(Array.isArray(setting.name) ? setting.name[0] : setting.name)
-          );
+          filteredSettings = allSettings.filter((setting: SettingModule) => {
+            const effectiveSettingName = Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '';
+            return ['Bitmoji Presence', 'Presence Logging', 'View Private Stories'].includes(effectiveSettingName);
+          });
+          break;
+        default:
+          filteredSettings = [];
           break;
       }
       return { ...tabConfig, settings: filteredSettings };
