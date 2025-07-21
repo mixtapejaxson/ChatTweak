@@ -1,7 +1,6 @@
 import React from 'react';
 import { ActionIcon, Anchor, Button, FocusTrap, Input, Modal, Text } from '@mantine/core';
 import { IconSearch, IconX, IconSettingsFilled } from '@tabler/icons-react';
-import DiscordIcon from './icons/Discord';
 import Fuse from 'fuse.js';
 import { type SettingModule } from '../../../../types/client';
 // @ts-ignore glob-import
@@ -93,9 +92,6 @@ function SettingsModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
       <ModalHeader onClose={onClose} search={search} setSearch={setSearch} />
       {search.length > 0 ? <ModalSettings search={search} /> : <SettingsTabs allSettings={allSettings} />}
       <div className="modalSection">
-        <Button leftSection={<DiscordIcon size={18} />} variant="light" component="a" href={ExternalUrls.DISCORD}>
-          Join our Discord
-        </Button>
         <Text
           className="footerText"
           component="a"
