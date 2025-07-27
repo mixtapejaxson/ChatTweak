@@ -2,7 +2,7 @@ import settings from '../../lib/settings';
 import Module from '../../lib/module';
 import { getConversation, getSnapchatPublicUser, getSnapchatStore } from '../../utils/snapchat';
 import { logInfo } from '../../lib/debug';
-import { PresenceActionMap, PresenceState } from '../../lib/constants';
+import { PresenceActionMap, PresenceState, SettingIds } from '../../lib/constants';
 
 const store = getSnapchatStore();
 
@@ -35,6 +35,13 @@ function sendPresenceNotification({
     iconUrl = `https://sdk.bitmoji.com/render/panel/${bitmojiSelfieId}-${bitmojiAvatarId}-v1.webp?transparent=1&trim=circle&scale=1`;
   } else if (bitmojiAvatarId != null) {
     iconUrl = `https://sdk.bitmoji.com/render/panel/${bitmojiAvatarId}-v1.webp?transparent=1&trim=circle&scale=1`;
+  }
+
+  const autocacheBitmoji = settings.getSetting(SettingIds.BITMOJI_AUTOCACHE);
+  if (autocacheBitmoji && iconUrl) {
+    // Pre-fetch the image to leverage browser caching
+    const img = new Image();
+    img.src = iconUrl;
   }
 
   const notificationOptions = {
@@ -126,6 +133,7 @@ class PresenceLogging extends Module {
     store.subscribe((storeState: any) => storeState.presence, this.load);
     settings.on('PRESENCE_LOGGING.setting:update', () => this.load());
     settings.on('HALF_SWIPE_NOTIFICATION.setting:update', () => this.load());
+    settings.on('BITMOJI_AUTOCACHE.setting:update', () => this.load());
   }
 
   load(presenceClient?: any) {

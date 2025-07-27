@@ -1,6 +1,8 @@
 import React from 'react';
 import { Tabs } from '@mantine/core';
 import { type SettingModule } from '../../../../types/client';
+import BlockSpotlight from './settings/BlockSpotlight';
+
 interface TabConfig {
   value: string;
   label: string;
@@ -41,26 +43,26 @@ function SettingsTabs({ allSettings }: SettingsTabsProps) {
       switch (tabConfig.value) {
         case 'general':
           filteredSettings = allSettings.filter((setting: SettingModule) => {
-            const effectiveSettingName = Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '';
+            const effectiveSettingName = (Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '') as string;
             return ['Always Present', 'Cross-Tab Support'].includes(effectiveSettingName);
           });
           break;
         case 'chat-messaging':
           filteredSettings = allSettings.filter((setting: SettingModule) => {
-            const effectiveSettingName = Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '';
-            return ['Chat Handling', 'Peeking Notification', 'Send Unsaveable Messages', 'Story Read Receipt', 'Typing Animation', 'Typing Notification'].includes(effectiveSettingName);
+            const effectiveSettingName = (Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '') as string;
+            return ['Chat Handling', 'Peeking Notification', 'Send Unsaveable Messages', 'Story Read Receipt', 'Typing Animation', 'Typing Notification', 'Block Spotlight'].includes(effectiveSettingName);
           });
           break;
         case 'media-snaps':
           filteredSettings = allSettings.filter((setting: SettingModule) => {
-            const effectiveSettingName = Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '';
+            const effectiveSettingName = (Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '') as string;
             return ['Local Save Snaps', 'Media Saving', 'Screenshot Prevention', 'Send Snaps as Mobile', 'Unlimited File Size', 'Upload Image Snaps'].includes(effectiveSettingName);
           });
           break;
         case 'presence-privacy':
           filteredSettings = allSettings.filter((setting: SettingModule) => {
-            const effectiveSettingName = Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '';
-            return ['Bitmoji Presence', 'Presence Logging', 'View Private Stories'].includes(effectiveSettingName);
+            const effectiveSettingName = (Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '') as string;
+            return ['Bitmoji Presence', 'Presence Logging', 'View Private Stories', 'Disable Telemetry', 'Disable Metrics'].includes(effectiveSettingName);
           });
           break;
         default:

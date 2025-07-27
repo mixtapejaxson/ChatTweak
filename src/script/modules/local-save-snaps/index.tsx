@@ -3,6 +3,7 @@ import settings from '../../lib/settings';
 import useSettingState from '../../hooks/useSettingState';
 import { getSnapchatStore } from '../../utils/snapchat';
 import React from 'react';
+import { SettingId, SettingIds } from '../../lib/constants'; // Import SettingId and SettingIds
 
 export class LocalSaveSnaps extends Module {
     public id: string;
@@ -52,7 +53,7 @@ export class LocalSaveSnaps extends Module {
     }
 
     private handleConversationsUpdate(conversations: any) {
-        if (!settings.getSetting(this.id)) {
+        if (!settings.getSetting(this.id as SettingId)) { // Cast to SettingId
             return; // Only process if the module is enabled
         }
 
@@ -98,8 +99,12 @@ export class LocalSaveSnaps extends Module {
 
     public saveSnap(snapId: string, data: string): void {
         try {
-            localStorage.setItem(this.getSnapKey(snapId), data);
-            console.log(`Snap ${snapId} saved locally.`);
+            const snapData = {
+                data: data,
+                timestamp: Date.now(), // Store current timestamp
+            };
+            localStorage.setItem(this.getSnapKey(snapId), JSON.stringify(snapData));
+            console.log(`Snap ${snapId} saved locally with timestamp.`);
         } catch (e) {
             console.error(`Failed to save snap ${snapId} locally:`, e);
         }
@@ -107,11 +112,37 @@ export class LocalSaveSnaps extends Module {
 
     public getSnap(snapId: string): string | null {
         try {
-            const data = localStorage.getItem(this.getSnapKey(snapId));
-            if (data) {
-                console.log(`Snap ${snapId} retrieved locally.`);
+            const stored = localStorage.getItem(this.getSnapKey(snapId));
+            if (!stored) {
+                return null;
             }
-            return data;
+
+            const snapData = JSON.parse(stored);
+            // Placeholder for cache duration. Will be replaced by actual setting.
+            // For now, let's assume a very long duration or no expiration for testing.
+            // The "on refresh" default will be handled by clearing cache on load or not saving.
+            const cacheDurationMinutes = settings.getSetting(SettingIds.LOCAL_SAVE_SNAPS_CACHE_DURATION);
+
+            if (cacheDurationMinutes === 0) { // "On refresh" or no persistent cache
+                console.log(`Snap ${snapId} not retrieved from persistent cache (on refresh mode).`);
+                return null;
+            }
+
+            if (cacheDurationMinutes === -1) { // "Never" expire
+                console.log(`Snap ${snapId} retrieved locally from cache (never expires).`);
+                return snapData.data;
+            }
+
+            const cacheDurationMs = cacheDurationMinutes * 60 * 1000; // Convert minutes to ms
+
+            if (Date.now() - snapData.timestamp > cacheDurationMs) {
+                this.deleteSnap(snapId); // Snap expired
+                console.log(`Snap ${snapId} expired and deleted from local cache.`);
+                return null;
+            }
+
+            console.log(`Snap ${snapId} retrieved locally from cache.`);
+            return snapData.data;
         } catch (e) {
             console.error(`Failed to retrieve snap ${snapId} locally:`, e);
             return null;
@@ -129,13 +160,15 @@ export class LocalSaveSnaps extends Module {
 
     getSettingsComponent(): React.FC {
         return () => {
-            const [enabled, setEnabled] = useSettingState(this.id);
+            // This component specifically manages the boolean 'enabled' state of the module.
+            // The cache duration setting will be a separate component.
+            const [enabled, setEnabled] = useSettingState(this.id as SettingId);
             return (
                 <div>
                     <label>
                         <input
                             type="checkbox"
-                            checked={enabled}
+                            checked={!!enabled} // Ensure 'enabled' is treated as a boolean
                             onChange={(e) => setEnabled(e.target.checked)}
                         />
                         Enable Local Save Snaps
