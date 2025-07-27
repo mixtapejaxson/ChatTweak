@@ -35,6 +35,11 @@ export const SettingIds = {
   PRESENCE_LOGGING: 'PRESENCE_LOGGING',
   SETTINGS_BUTTON_LAYOUT: 'SETTINGS_BUTTON_LAYOUT',
   LOCAL_SAVE_SNAPS: 'LOCAL_SAVE_SNAPS',
+  DISABLE_TELEMETRY: 'DISABLE_TELEMETRY',
+  DISABLE_METRICS: 'DISABLE_METRICS',
+  BITMOJI_AUTOCACHE: 'BITMOJI_AUTOCACHE',
+  BLOCK_SPOTLIGHT: 'BLOCK_SPOTLIGHT',
+  LOCAL_SAVE_SNAPS_CACHE_DURATION: 'LOCAL_SAVE_SNAPS_CACHE_DURATION', // New setting
 } as const;
 
 export enum BitmojiPresence {
@@ -79,6 +84,11 @@ export const defaultSettingValues = {
   [SettingIds.PRESENCE_LOGGING]: false,
   [SettingIds.SETTINGS_BUTTON_LAYOUT]: SettingsButtonLayout.RIGHT,
   [SettingIds.LOCAL_SAVE_SNAPS]: false,
+  [SettingIds.DISABLE_TELEMETRY]: true,
+  [SettingIds.DISABLE_METRICS]: true,
+  [SettingIds.BITMOJI_AUTOCACHE]: true,
+  [SettingIds.BLOCK_SPOTLIGHT]: false,
+  [SettingIds.LOCAL_SAVE_SNAPS_CACHE_DURATION]: 0, // Default to 0 for "on refresh"
 };
 
 export type SettingId = keyof typeof SettingIds;

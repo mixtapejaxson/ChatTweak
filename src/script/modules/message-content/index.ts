@@ -1,13 +1,15 @@
 import settings from '../../lib/settings';
 import Module from '../../lib/module';
+import { SettingIds } from '../../lib/constants';
 import { getSnapchatStore } from '../../utils/snapchat';
 
 const store = getSnapchatStore();
 
-function modifyExternalMediaToSnapContent(arr: any): any {
-  arr = arr.slice(2);
-  arr[0] = 0x5a;
-  return arr;
+function modifyExternalMediaToSnapContent(arr: Uint8Array): Uint8Array {
+  const newArr = new Uint8Array(arr.length - 2 + 1); // Original length - 2 (sliced) + 1 (new 0x5a byte)
+  newArr[0] = 0x5a;
+  newArr.set(arr.slice(2), 1);
+  return newArr;
 }
 
 let oldGetConversationManager: any = null;
@@ -24,11 +26,20 @@ function patchSendMessageWithContent(mananger: any) {
         apply(targetFunc, thisArg, args) {
           const [, message] = args;
 
-          if (settings.getSetting('UPLOAD_SNAPS') && message.contentType === 3) {
+          if (settings.getSetting('UPLOAD_SNAPS')) {
             message.contentType = 1;
             message.savePolicy = 2;
-            message.platformAnalytics.metricsMessageType = 3;
-            message.content = modifyExternalMediaToSnapContent(message.content);
+            if (!settings.getSetting(SettingIds.DISABLE_METRICS)) {
+              message.platformAnalytics.metricsMessageType = 3;
+            }
+            // Ensure message.content is a Uint8Array before modification
+            if (message.content instanceof ArrayBuffer) {
+              message.content = new Uint8Array(message.content);
+            } else if (! (message.content instanceof Uint8Array)) {
+              // Attempt to convert to Uint8Array if it's a regular array or other type
+              message.content = new Uint8Array(message.content);
+            }
+            message.content = modifyExternalMediaToSnapContent(message.content as Uint8Array);
           }
 
           if (settings.getSetting('SEND_UNSAVEABLE_MESSAGES')) {
