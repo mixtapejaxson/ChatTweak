@@ -8,8 +8,13 @@
 
 Screenshot Freely, Save Media, Bypass Presence Detection and more!
 
-- This is a fork of BetterChat which will support more features.
-- More info coming soon...
+This is a fork of BetterChat which will support more features.
+
+New Features:
+* Disable Spotlight
+* Disable metrics
+* Disable Telemetry
+* Cleaner tabbed UI
 
 ## How to install
 
