@@ -4,12 +4,18 @@
 ![Node CI badge](https://github.com/mixtapejaxson/ChatTweak/actions/workflows/node.js.yml/badge.svg)
 
 > [!IMPORTANT]  
-> WebTweak is an independent userscript and is **NOT affiliated with, sponsored by, or endorsed by ANY companies this website lists, in any way**. The use of any copyright protected terms or marks in this extension is for descriptive and derivative purposes only and does not imply any association with these companies. All trademarks and brand names are the property of their respective owners.
+> ChatTweak is an independent userscript and is **NOT affiliated with, sponsored by, or endorsed by ANY companies this project lists, in any way**. The use of any copyright protected terms or marks in this extension is for descriptive and derivative purposes only and does not imply any association with these companies. All trademarks and brand names are the property of their respective owners.
 
 Screenshot Freely, Save Media, Bypass Presence Detection and more!
 
-- This is a fork of BetterChat which will support more features.
-- More info coming soon...
+This is a fork of BetterChat which will support more features.
+
+New Features:
+* Disable Spotlight
+* Disable metrics
+* Disable Telemetry
+* Cleaner tabbed UI
+* Removed features that are patched
 
 ## How to install
 
@@ -33,7 +39,4 @@ For [Tampermonkey](https://www.tampermonkey.net/) it's recommended you set Secur
 
 > Disable any other instances of ChatTweak you may have running.
 
-## Other stuff
-
-["Support the Upstream"](https://www.buymeacoffee.com/dclstn)
 
