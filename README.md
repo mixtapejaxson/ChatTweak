@@ -15,6 +15,7 @@ New Features:
 * Disable metrics
 * Disable Telemetry
 * Cleaner tabbed UI
+* Removed features that are patched
 
 ## How to install
 
