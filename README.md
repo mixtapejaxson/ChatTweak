@@ -33,7 +33,4 @@ For [Tampermonkey](https://www.tampermonkey.net/) it's recommended you set Secur
 
 > Disable any other instances of ChatTweak you may have running.
 
-## Other stuff
-
-["Support the Upstream"](https://www.buymeacoffee.com/dclstn)
 
