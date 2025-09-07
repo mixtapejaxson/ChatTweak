@@ -37,7 +37,7 @@ GM_addElement('script', {
     sourcemap: false,
     target: ['chrome58', 'firefox57'],
     outbase: './src/',
-    outdir: './public/build/',
+    outdir: './dist/',
     logLevel: 'info',
     plugins: [
       EsbuildPluginImportGlob(),
