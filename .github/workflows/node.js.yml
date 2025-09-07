@@ -8,8 +8,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3.5.0
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
@@ -19,11 +19,35 @@ jobs:
       - run: npm cache clean --force
       - name: Install Node Dependencies
         run: npm install --no-package-lock
-      - name: Build Chrome
-        run: npm run build:chrome
-      - name: Build Firefox
-        run: npm run build:firefox
-      - name: Post Lint Firefox
-        run: npm run manifest-lint
-      - name: Build User-Script
-        run: npm run build:userscript
+        
+      - name: Build All
+        run: npm run build
+
+      - name: Package All
+        run: npm run package
+        
+      - name: Clear build folder
+        run: |
+          rm -rf build
+          mkdir build
+  
+      - name: Copy built files to build folder
+        run: cp -r dist/* build/
+  
+      - name: Commit build folder
+        uses: EndBug/add-and-commit@v7
+        with:
+          add: build
+          message: 'Update build folder'
+          push: true
+  
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
