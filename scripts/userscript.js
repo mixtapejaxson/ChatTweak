@@ -37,7 +37,7 @@ GM_addElement('script', {
     sourcemap: false,
     target: ['chrome58', 'firefox57'],
     outbase: './src/',
-    outdir: './dist/',
+    outdir: './public/build',
     logLevel: 'info',
     plugins: [
       EsbuildPluginImportGlob(),
@@ -63,5 +63,5 @@ GM_addElement('script', {
   });
 
   const scriptTextContent = await fs.readFile(`./public/build/script.js`, 'utf-8');
-  await fs.writeFile('./public/build/userscript.js', USER_SCRIPT_METADATA(scriptTextContent));
+  await fs.writeFile('./dist/ChatTweak.user.js', USER_SCRIPT_METADATA(scriptTextContent));
 })();

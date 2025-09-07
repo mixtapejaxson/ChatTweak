@@ -12,7 +12,7 @@
     "build:all": "npm run build:chrome && npm run build:firefox && npm run build:userscript",
     "build:chrome": "shx rm -rf ./public/build/ && node ./scripts/chrome.js",
     "build:firefox": "shx rm -rf ./public/build/ && node ./scripts/firefox.js",
-    "build:userscript": "shx rm -rf ./public/build/ && node ./scripts/userscript.js",
+    "build:userscript": "shx rm -rf ./public/build/ && shx rm -rf ./dist/ChatTweak.user.js && node ./scripts/userscript.js",
 
     "package": "npm run package:all",
     "package:all":  "npm run package:chrome && npm run package:firefox",
