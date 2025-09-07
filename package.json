@@ -3,17 +3,18 @@
   "version": "1.6.1",
   "description": "Your personal helper to make Web messaging a more fun and feature rich place, without compromising on privacy!",
   "scripts": {
-    "start": "rm -rf ./public/build/ && node ./scripts/dev.js",
-    "build": "npm run build:chrome",
+    "start": "shx rm -rf ./public/build/ && node ./scripts/dev.js",
+    "build": "npm run build:all",
     "manifest-lint": "addons-linter public/",
     "lint": "eslint --ignore-pattern \"src/**/*.{ts,tsx}\" && prettier --check \"src/**/*.{ts,tsx}\"",
     "lint:fix": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "build:chrome": "rm -rf ./public/build/ && node ./scripts/chrome.js",
-    "build:firefox": "rm -rf ./public/build/ && node ./scripts/firefox.js",
-    "build:userscript": "rm -rf ./public/build/ && node ./scripts/userscript.js",
+    "build:all": "npm run build:chrome && npm run build:firefox && npm run build:userscript",
+    "build:chrome": "shx rm -rf ./public/build/ && node ./scripts/chrome.js",
+    "build:firefox": "shx rm -rf ./public/build/ && node ./scripts/firefox.js",
+    "build:userscript": "shx rm -rf ./public/build/ && node ./scripts/userscript.js",
     "package": "npm run package:chrome",
-    "package:chrome": "rm -rf ./public/build/ && npm run build:chrome && cd ./public && zip -D -r ../ChatTweak-chrome.zip . && cd ..",
-    "package:firefox": "rm -rf ./public/build/ && npm run build:firefox && cd ./public && zip -D -r ../ChatTweak-firefox.zip . && cd .."
+    "package:chrome": "shx rm -rf ./public/build/ && npm run build:chrome && cd ./public && zip -D -r ../ChatTweak-chrome.zip . && cd ..",
+    "package:firefox": "shx rm -rf ./public/build/ && npm run build:firefox && cd ./public && zip -D -r ../ChatTweak-firefox.zip . && cd .."
   },
   "repository": {
     "type": "git",
@@ -67,6 +68,7 @@
     "nodemon": "^3.1.10",
     "prettier": "^3.3.3",
     "reconnecting-websocket": "^4.4.0",
+    "shx": "^0.4.0",
     "ws": "^8.18.2"
   }
 }
