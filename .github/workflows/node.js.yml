@@ -19,11 +19,5 @@ jobs:
       - run: npm cache clean --force
       - name: Install Node Dependencies
         run: npm install --no-package-lock
-      - name: Build Chrome
-        run: npm run build:chrome
-      - name: Build Firefox
-        run: npm run build:firefox
-      - name: Post Lint Firefox
-        run: npm run manifest-lint
-      - name: Build User-Script
-        run: npm run build:userscript
+      - name: Build All
+        run: npm run build
