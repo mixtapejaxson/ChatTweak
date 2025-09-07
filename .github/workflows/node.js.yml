@@ -43,7 +43,7 @@ jobs:
 
       - name: Get version
         id: get_version
-        run: echo "version=$(node -p -e "require('./package.json').version")"
+        run: echo "version=$(node -p -e "require('./package.json').version") >> $GITHUB_OUTPUT"
 
       - name: Debug version
         run: |
