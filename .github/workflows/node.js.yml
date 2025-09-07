@@ -30,9 +30,9 @@ jobs:
         run: |
           rm -rf build
           mkdir build
-  
+
       - name: Copy built files to build folder
-        run: cp -r dist/* build/
+        run: cp -r ./dist/* build/
   
       - name: Commit build folder
         uses: EndBug/add-and-commit@v7
