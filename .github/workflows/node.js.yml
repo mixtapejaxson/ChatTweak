@@ -45,6 +45,10 @@ jobs:
         id: get_version
         run: echo "version=$(node -p -e "require('./package.json').version")"
 
+      - name: Debug version
+        run: |
+            echo "Version: ${{ steps.get_version.outputs.version }}"
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
