@@ -28,6 +28,7 @@ jobs:
         
       - name: Clear build folder
         run: |
+          git rm -rf --ignore-unmatch build
           rm -rf build
           mkdir build
 
