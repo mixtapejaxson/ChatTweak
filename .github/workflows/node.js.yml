@@ -40,7 +40,11 @@ jobs:
           add: build
           message: 'Update build folder'
           push: true
-  
+
+      - name: Get version
+        id: get_version
+        run: echo "version=$(node -p -e "require('./package.json').version")"
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -51,7 +55,3 @@ jobs:
           release_name: Release ${{ steps.get_version.outputs.version }}
           draft: false
           prerelease: false
-
-      - name: Get version
-        id: get_version
-        run: echo "version=$(node -p -e "require('./package.json').version")"
