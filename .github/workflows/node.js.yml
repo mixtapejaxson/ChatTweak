@@ -50,10 +50,9 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Debug data
+      - name: Version data
         run: |
             echo "Version: ${{ env.VERSION }}"
-            find .
 
       - name: Create Release
         id: create_release
