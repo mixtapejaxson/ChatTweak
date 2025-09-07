@@ -20,8 +20,8 @@ jobs:
       - name: Install Node Dependencies
         run: npm install --no-package-lock
         
-      - name: Build All
-        run: npm run build
+      - name: Build Userscript
+        run: npm run build:userscript
 
       - name: Package All
         run: npm run package
