@@ -47,7 +47,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${ node -p -e "require('./package.json').version" }
-          release_name: Release ${ node -p -e "require('./package.json').version" }
+          tag_name: ${{ steps.get_version.outputs.version }}
+          release_name: Release ${{ steps.get_version.outputs.version }}
           draft: false
           prerelease: false
+
+      - name: Get version
+        id: get_version
+        run: echo "version=$(node -p -e "require('./package.json').version")"
