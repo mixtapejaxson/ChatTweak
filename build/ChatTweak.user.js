@@ -5,12 +5,10 @@
 // @description  Your personal helper to make Web messaging a more fun and feature rich place, without compromising on privacy!
 // @author       Jaxson Waayers, appelmoesGG
 // @match        https://*.snapchat.com/*
-// @icon         https://better-chat.pages.dev/logo128.png
+// @icon         https://raw.githubusercontent.com/mixtapejaxson/ChatTweak/refs/heads/master/public/logo128.png
 // @run-at       document-start
 // @grant        GM_addElement
-// @connect      better-chat.vasp.dev
-// @license      MIT
-// @namespace    https://better-chat.vasp.dev
+// @license      GPL
 // ==/UserScript==
 
 GM_addElement('script', {
