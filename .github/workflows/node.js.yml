@@ -43,9 +43,9 @@ jobs:
       - name: Check version bump
         id: check
         run: |
-          echo "Previous version: ${{ steps.previous_version.outputs.version }}"
-          echo "Current version:  ${{ steps.current_version.outputs.version }}"
-          if [ "${{ steps.previous_version.outputs.version }}" != "${{ steps.current_version.outputs.version }}" ]; then
+          echo "Previous version: ${{ env.OLD_VERSION }}"
+          echo "Current version:  ${{ env.VERSION }}"
+          if [ "${{ env.OLD_VERSION }}" != "${{ env.VERSION }}" ]; then
             echo "bumped=true" >> "$GITHUB_OUTPUT"
           else
             echo "bumped=false" >> "$GITHUB_OUTPUT"
