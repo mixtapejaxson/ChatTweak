@@ -3,6 +3,9 @@ name: Node.js CI
 on:
   push:
     branches: ['master']
+    paths:
+      - 'package.json'
+      - 'src/**'
 
 jobs:
   build:
@@ -10,35 +13,55 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
+          fetch-depth: 2
           ref: master
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
           cache: 'npm'
+          
       - run: node --version
       - run: npm --version
       - run: npm cache clean --force
       - name: Install Node Dependencies
         run: npm install --no-package-lock
-        
-      - name: Build Userscript
-        run: npm run build:userscript
 
-      - name: Package All
-        run: npm run package
-        
       - name: Get version
         id: get_version
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Version data
+      - name: Get old version
+        id: get_older_version
         run: |
-            echo "Version: ${{ env.VERSION }}"
+          git show HEAD^:package.json > old_package.json
+          OLD_VERSION=$(node -p "require('./old_package.json').version")
+          echo "OLD_VERSION=$OLD_VERSION" >> $GITHUB_ENV
+
+      - name: Check version bump
+        id: check
+        run: |
+          echo "Previous version: ${{ steps.previous_version.outputs.version }}"
+          echo "Current version:  ${{ steps.current_version.outputs.version }}"
+          if [ "${{ steps.previous_version.outputs.version }}" != "${{ steps.current_version.outputs.version }}" ]; then
+            echo "bumped=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
+          fi
+        
+      - name: Build Userscript 
+        if: steps.check.outputs.bumped == 'true'
+        run: npm run build:userscript
+
+      - name: Package All
+        if: steps.check.outputs.bumped == 'true'
+        run: npm run package
+        
 
       - name: Create Release
+        if: steps.check.outputs.bumped == 'true'
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
