@@ -3,6 +3,9 @@ name: Node.js CI
 on:
   push:
     branches: ['master']
+    paths:
+      - 'package.json'
+      - 'src/**'
 
 jobs:
   build:
@@ -10,39 +13,19 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
+          fetch-depth: 2
           ref: master
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
           cache: 'npm'
+          
       - run: node --version
       - run: npm --version
       - run: npm cache clean --force
       - name: Install Node Dependencies
         run: npm install --no-package-lock
-        
-      - name: Build Userscript
-        run: npm run build:userscript
-
-      - name: Package All
-        run: npm run package
-        
-      - name: Clear build folder
-        run: |
-          git rm -rf --ignore-unmatch build
-          rm -rf build
-          mkdir build
-
-      - name: Copy built files to build folder
-        run: cp -r ./dist/* build/
-  
-      - name: Commit build folder
-        uses: EndBug/add-and-commit@v7
-        with:
-          add: "build"
-          message: 'Update build folder'
-          push: true
 
       - name: Get version
         id: get_version
@@ -50,17 +33,38 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Version data
+      - name: Get old version
+        id: get_older_version
         run: |
-            echo "Version: ${{ env.VERSION }}"
+          git show HEAD^:package.json > old_package.json
+          OLD_VERSION=$(node -p "require('./old_package.json').version")
+          echo "OLD_VERSION=$OLD_VERSION" >> $GITHUB_ENV
+
+      - name: Check version bump
+        id: check
+        run: |
+          echo "Previous version: ${{ env.OLD_VERSION }}"
+          echo "Current version:  ${{ env.VERSION }}"
+          if [ "${{ env.OLD_VERSION }}" != "${{ env.VERSION }}" ]; then
+            echo "bumped=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
+          fi
+        
+      - name: Build Userscript 
+        if: steps.check.outputs.bumped == 'true'
+        run: npm run build:userscript
+
+      - name: Package All
+        if: steps.check.outputs.bumped == 'true'
+        run: npm run package
+        
 
       - name: Create Release
+        if: steps.check.outputs.bumped == 'true'
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.VERSION }}
-          release_name: Release ${{ env.VERSION }}
-          draft: false
-          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: v${{ env.VERSION }}
+          files: dist/*

@@ -28,7 +28,7 @@ You can install **ChatTweak** via the User-Script with a tool like [Tampermonkey
 
 For [Tampermonkey](https://www.tampermonkey.net/) it's recommended you set Security > Content Script API to `UserScripts API Dynamic`, for SnapTweak to be injected reliably.
 
-After following these steps, click [here](https://github.com/mixtapejaxson/ChatTweak/raw/refs/heads/master/build/ChatTweak.user.js) to install the latest version of the script.
+After following these steps, click [here](https://github.com/appelmoesgg/ChatTweak/releases/latest/download/ChatTweak.user.js) to install the latest version of the script.
 
 ## How to Contribute
 
