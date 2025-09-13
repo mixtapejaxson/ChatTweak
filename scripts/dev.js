@@ -56,7 +56,7 @@ async function buildExtension() {
       ],
       define: {
         'process.env.VERSION': JSON.stringify(package.version),
-        'process.env.HMR_PORT': process.env.HMR_PORT,
+        'process.env.HMR_PORT': JSON.stringify(process.env.HMR_PORT ?? '8080'),
       },
     }),
     fs.writeFile('./public/manifest.json', JSON.stringify(manifest, null, 2)),
