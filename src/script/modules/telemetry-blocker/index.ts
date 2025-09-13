@@ -11,9 +11,16 @@ class TelemetryBlocker extends Module {
 
   constructor() {
     super('Telemetry Blocker');
-    settings.on(`${SettingIds.DISABLE_TELEMETRY}.setting:update`, () => this.load());
-    settings.on(`${SettingIds.DISABLE_METRICS}.setting:update`, () => this.load());
-    settings.on(`${SettingIds.BLOCK_SPOTLIGHT}.setting:update`, () => this.load());
+
+    this.load = this.load.bind(this);
+    this.enableBlocking = this.enableBlocking.bind(this);
+    this.disableBlocking = this.disableBlocking.bind(this);
+
+    settings.on(`${SettingIds.DISABLE_TELEMETRY}.setting:update`, this.load);
+    settings.on(`${SettingIds.DISABLE_METRICS}.setting:update`, this.load);
+    settings.on(`${SettingIds.BLOCK_SPOTLIGHT}.setting:update`, this.load);
+
+    this.load();
   }
 
   load() {
