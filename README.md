@@ -22,13 +22,7 @@ New Features:
 > [!WARNING]
 > This userscript is provided "as is" without any warranties, guarantees, or assurances of reliability or compatibility. By using WebTweak, you acknowledge that you do so at your own risk, and the developers are not liable for any issues, data loss, or other consequences that may arise from its use.
 
-### Other Browsers
-
-You can install **ChatTweak** via the User-Script with a tool like [Tampermonkey](https://www.tampermonkey.net/).
-
-For [Tampermonkey](https://www.tampermonkey.net/) it's recommended you set Security > Content Script API to `UserScripts API Dynamic`, for SnapTweak to be injected reliably.
-
-After following these steps, click [here](https://github.com/appelmoesgg/ChatTweak/releases/latest/download/ChatTweak.user.js) to install the latest version of the script.
+Follow our [installation guide](./docs/installation.md).
 
 ## How to Contribute
 
