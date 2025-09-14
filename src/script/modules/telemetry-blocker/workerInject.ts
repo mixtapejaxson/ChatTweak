@@ -1,5 +1,3 @@
-import { log } from "console";
-
 export default function (METRICS_URL: string, SPOTLIGHT_URL: string, SNAP_OPEN_URL: string, settings: any) {
     const logInfo = console.log;
 
