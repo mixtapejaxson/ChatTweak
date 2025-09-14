@@ -1,4 +1,4 @@
-const PREFIX = '[Better-Chat]';
+const PREFIX = '[SnapTweak]';
 
 let iframeContentWindow: any | null = null;
 
