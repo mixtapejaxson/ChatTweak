@@ -1,4 +1,8 @@
-# 📖 Installation Guide
+> [!WARNING]
+> This userscript is provided "as is" without any warranties, guarantees, or assurances of reliability or compatibility. By using WebTweak, you acknowledge that you do so at your own risk, and the developers are not liable for any issues, data loss, or other consequences that may arise from its use.
+
+
+# Installation Guide
 
 This project is available in **two variants**:  
 1. **Userscript** 
