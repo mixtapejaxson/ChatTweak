@@ -56,7 +56,7 @@ function SettingsTabs({ allSettings }: SettingsTabsProps) {
         case 'media-snaps':
           filteredSettings = allSettings.filter((setting: SettingModule) => {
             const effectiveSettingName = (Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '') as string;
-            return ['Local Save Snaps', 'Media Saving', 'Screenshot Prevention', 'Send Snaps as Mobile', 'Unlimited File Size', 'Upload Image Snaps'].includes(effectiveSettingName);
+            return ['Local Save Snaps', 'Media Saving', 'Screenshot Prevention', 'Send Snaps as Mobile', 'Unlimited File Size', 'Upload Image Snaps', 'Infinite Snap Rewatch'].includes(effectiveSettingName);
           });
           break;
         case 'presence-privacy':
