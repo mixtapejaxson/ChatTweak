@@ -3,7 +3,6 @@ import settings from '../../lib/settings';
 import injectFunction from './workerInject'
 import { SettingIds } from '../../lib/constants';
 import { logInfo } from '../../lib/debug';
-import { set } from 'cookies';
 
 
 const METRICS_URL = 'https://gcp.api.snapchat.com/web/metrics';
@@ -26,7 +25,7 @@ class TelemetryBlocker extends Module {
         constructor(...args: any[]) {
           const data = args[0][0];
           if (typeof data === "string" && data.startsWith("importScripts")) {
-            args[0][0] += `\n(${injectFunction})("${SNAP_OPEN_URL}", ${settings.getSetting("INFINITE_SNAP_REWATCH")});`;
+            args[0][0] += `\n(${injectFunction})("${SNAP_OPEN_URL}", ${settings.getSetting("INFINITE_SNAP_REWATCH")}, ${settings.getSetting("NO_READ_RECEIPTS")});`;
             window.Blob = oldBlobClass;
           }
           super(...args);
@@ -41,6 +40,7 @@ class TelemetryBlocker extends Module {
     settings.on(`${SettingIds.DISABLE_METRICS}.setting:update`, this.load);
     settings.on(`${SettingIds.BLOCK_SPOTLIGHT}.setting:update`, this.load);
     settings.on(`${SettingIds.INFINITE_SNAP_REWATCH}.setting:update`, this.load);
+    settings.on(`${SettingIds.NO_READ_RECEIPTS}.setting:update`, this.load);
 
     this.load();
   }
@@ -50,12 +50,11 @@ class TelemetryBlocker extends Module {
     const disableMetrics = settings.getSetting(SettingIds.DISABLE_METRICS);
     const blockSpotlight = settings.getSetting(SettingIds.BLOCK_SPOTLIGHT);
     const infiniteRewatchSnap = settings.getSetting(SettingIds.INFINITE_SNAP_REWATCH);
+    const unread = settings.getSetting(SettingIds.NO_READ_RECEIPTS);
 
-    if (infiniteRewatchSnap){
-      BROADCAST_CHANNEL.postMessage({ enabled: true });
-    } else {
-      BROADCAST_CHANNEL.postMessage({ enabled: false });
-    }
+    logInfo(infiniteRewatchSnap, unread)
+
+    BROADCAST_CHANNEL.postMessage({ infiniteRewatchSnap: infiniteRewatchSnap, unread: unread });
 
     if (disableTelemetry || disableMetrics || blockSpotlight) {
       this.enableBlocking();
@@ -84,6 +83,7 @@ class TelemetryBlocker extends Module {
           logInfo('Blocked Spotlight request:', url);
           return new Response(null, { status: 204 }); // Return a successful but empty response
         }
+
         return this.originalFetch!(input, init);
       };
     }
@@ -115,8 +115,6 @@ class TelemetryBlocker extends Module {
   }
 
   disableBlocking() {
-    BROADCAST_CHANNEL.postMessage({ enabled: false });
-    
     if (this.originalFetch !== null) {
       window.fetch = this.originalFetch;
       this.originalFetch = null;
