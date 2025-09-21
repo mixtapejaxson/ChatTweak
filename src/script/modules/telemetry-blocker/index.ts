@@ -19,6 +19,19 @@ class TelemetryBlocker extends Module {
   constructor() {
     super('Telemetry Blocker');
 
+    // injection into webworker, required to block certain requests
+    const oldBlobClass = window.Blob;
+      window.Blob = class HookedBlob extends Blob {
+        constructor(...args: any[]) {
+          const data = args[0][0];
+          if (typeof data === "string" && data.startsWith("importScripts")) {
+            args[0][0] += `\n(${injectFunction})("${SNAP_OPEN_URL}", ${settings.getSetting("INFINITE_SNAP_REWATCH")}, ${settings.getSetting("NO_READ_RECEIPTS")});`;
+            window.Blob = oldBlobClass;
+          }
+          super(...args);
+        }
+      };
+
     this.load = this.load.bind(this);
     this.enableBlocking = this.enableBlocking.bind(this);
     this.disableBlocking = this.disableBlocking.bind(this);
@@ -26,6 +39,8 @@ class TelemetryBlocker extends Module {
     settings.on(`${SettingIds.DISABLE_TELEMETRY}.setting:update`, this.load);
     settings.on(`${SettingIds.DISABLE_METRICS}.setting:update`, this.load);
     settings.on(`${SettingIds.BLOCK_SPOTLIGHT}.setting:update`, this.load);
+    settings.on(`${SettingIds.INFINITE_SNAP_REWATCH}.setting:update`, this.load);
+    settings.on(`${SettingIds.NO_READ_RECEIPTS}.setting:update`, this.load);
 
     this.load();
   }
@@ -34,33 +49,23 @@ class TelemetryBlocker extends Module {
     const disableTelemetry = settings.getSetting(SettingIds.DISABLE_TELEMETRY);
     const disableMetrics = settings.getSetting(SettingIds.DISABLE_METRICS);
     const blockSpotlight = settings.getSetting(SettingIds.BLOCK_SPOTLIGHT);
+    const infiniteRewatchSnap = settings.getSetting(SettingIds.INFINITE_SNAP_REWATCH);
+    const unread = settings.getSetting(SettingIds.NO_READ_RECEIPTS);
+
+    logInfo(infiniteRewatchSnap, unread)
+
+    BROADCAST_CHANNEL.postMessage({ infiniteRewatchSnap: infiniteRewatchSnap, unread: unread });
 
     if (disableTelemetry || disableMetrics || blockSpotlight) {
       this.enableBlocking();
-    } else {
+    }  else {
       this.disableBlocking();
     }
   }
 
   enableBlocking() {
-    BROADCAST_CHANNEL.postMessage({ type: 'telemetry-blocker-status', enabled: true });
 
     if (this.originalFetch === null) {
-      const oldBlobClass = window.Blob;
-      window.Blob = class HookedBlob extends Blob {
-        constructor(...args: any[]) {
-          const data = args[0][0];
-          if (typeof data === "string" && data.startsWith("importScripts")) {
-            args[0][0] += `\n(${injectFunction})("${METRICS_URL}",
-                                                 "${SPOTLIGHT_URL}",
-                                                 "${SNAP_OPEN_URL}",
-                                                 "settings");`;
-            window.Blob = oldBlobClass;
-          }
-          super(...args);
-        }
-      };
-
       this.originalFetch = window.fetch;
       window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
@@ -78,6 +83,7 @@ class TelemetryBlocker extends Module {
           logInfo('Blocked Spotlight request:', url);
           return new Response(null, { status: 204 }); // Return a successful but empty response
         }
+
         return this.originalFetch!(input, init);
       };
     }
@@ -109,8 +115,6 @@ class TelemetryBlocker extends Module {
   }
 
   disableBlocking() {
-    BROADCAST_CHANNEL.postMessage({ type: 'telemetry-blocker-status', enabled: true });
-
     if (this.originalFetch !== null) {
       window.fetch = this.originalFetch;
       this.originalFetch = null;

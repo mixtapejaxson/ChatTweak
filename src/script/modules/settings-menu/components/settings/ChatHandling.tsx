@@ -11,8 +11,7 @@ const DEFAULT_DESCRIPTION = 'Do what Snapchat normally does.';
 const AUTO_SAVE_NAME = 'Auto-Save Messages';
 const AUTO_SAVE_DESCRIPTION = 'Automatically save all messages to your history.';
 
-const NO_READ_RECEIPTS_NAME = 'Unread';
-const NO_READ_RECEIPTS_DESCRIPTION = 'Prevent others from knowing you read their message.';
+
 
 function ChatHandling_() {
   const [chatHandling, setChatHandling] = useSettingState('CHAT_HANDLING');
@@ -23,11 +22,12 @@ function ChatHandling_() {
         <Radio value={ChatHandling.AUTO_SAVE} label={AUTO_SAVE_NAME} description={AUTO_SAVE_DESCRIPTION} />
       </Stack>
     </Radio.Group>
+  
   );
 }
 
 export default {
-  name: [NAME, DEFAULT_NAME, AUTO_SAVE_NAME, NO_READ_RECEIPTS_NAME],
-  description: [DEFAULT_DESCRIPTION, AUTO_SAVE_DESCRIPTION, NO_READ_RECEIPTS_DESCRIPTION],
+  name: [NAME, DEFAULT_NAME, AUTO_SAVE_NAME],
+  description: [DEFAULT_DESCRIPTION, AUTO_SAVE_DESCRIPTION],
   component: ChatHandling_,
 };
