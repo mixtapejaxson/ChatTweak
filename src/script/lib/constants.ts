@@ -39,6 +39,8 @@ export const SettingIds = {
   DISABLE_METRICS: 'DISABLE_METRICS',
   BITMOJI_AUTOCACHE: 'BITMOJI_AUTOCACHE',
   BLOCK_SPOTLIGHT: 'BLOCK_SPOTLIGHT',
+  INFINITE_SNAP_REWATCH: 'INFINITE_SNAP_REWATCH',
+  NO_READ_RECEIPTS: 'NO_READ_RECEIPTS',
   LOCAL_SAVE_SNAPS_CACHE_DURATION: 'LOCAL_SAVE_SNAPS_CACHE_DURATION', // New setting
 } as const;
 
@@ -88,6 +90,8 @@ export const defaultSettingValues = {
   [SettingIds.DISABLE_METRICS]: true,
   [SettingIds.BITMOJI_AUTOCACHE]: true,
   [SettingIds.BLOCK_SPOTLIGHT]: false,
+  [SettingIds.INFINITE_SNAP_REWATCH]: false,
+  [SettingIds.NO_READ_RECEIPTS]: false,
   [SettingIds.LOCAL_SAVE_SNAPS_CACHE_DURATION]: 0, // Default to 0 for "on refresh"
 };
 
