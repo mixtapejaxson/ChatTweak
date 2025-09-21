@@ -1,6 +1,6 @@
 {
   "name": "ChatTweak",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Your personal helper to make Web messaging a more fun and feature rich place, without compromising on privacy!",
   "scripts": {
     "start": "shx rm -rf ./public/build/ && node ./scripts/dev.js",
