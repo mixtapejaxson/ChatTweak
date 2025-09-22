@@ -92,6 +92,7 @@ function SettingsTabs({ allSettings }: SettingsTabsProps) {
               'Presence Logging',
               'Message Logging',
               'Detailed Message Logging',
+              'Message Log Export',
               'View Private Stories',
               'Disable Telemetry',
               'Disable Metrics',
