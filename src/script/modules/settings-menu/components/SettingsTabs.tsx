@@ -38,31 +38,64 @@ const tabConfigurations: TabConfig[] = [
 
 function SettingsTabs({ allSettings }: SettingsTabsProps) {
   const filteredTabConfigurations = React.useMemo(() => {
-    return tabConfigurations.map(tabConfig => {
+    return tabConfigurations.map((tabConfig) => {
       let filteredSettings: SettingModule[] = [];
       switch (tabConfig.value) {
         case 'general':
           filteredSettings = allSettings.filter((setting: SettingModule) => {
-            const effectiveSettingName = (Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '') as string;
+            const effectiveSettingName = (
+              Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : (setting.name ?? '')
+            ) as string;
             return ['Always Present', 'Cross-Tab Support'].includes(effectiveSettingName);
           });
           break;
         case 'chat-messaging':
           filteredSettings = allSettings.filter((setting: SettingModule) => {
-            const effectiveSettingName = (Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '') as string;
-            return ['Chat Handling', 'Peeking Notification', 'Send Unsaveable Messages', 'Story Read Receipt', 'Typing Animation', 'Typing Notification', 'Block Spotlight', 'Unread'].includes(effectiveSettingName);
+            const effectiveSettingName = (
+              Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : (setting.name ?? '')
+            ) as string;
+            return [
+              'Chat Handling',
+              'Peeking Notification',
+              'Send Unsaveable Messages',
+              'Story Read Receipt',
+              'Typing Animation',
+              'Typing Notification',
+              'Block Spotlight',
+              'Unread',
+            ].includes(effectiveSettingName);
           });
           break;
         case 'media-snaps':
           filteredSettings = allSettings.filter((setting: SettingModule) => {
-            const effectiveSettingName = (Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '') as string;
-            return ['Local Save Snaps', 'Media Saving', 'Screenshot Prevention', 'Send Snaps as Mobile', 'Unlimited File Size', 'Upload Image Snaps', 'Infinite Snap Rewatch'].includes(effectiveSettingName);
+            const effectiveSettingName = (
+              Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : (setting.name ?? '')
+            ) as string;
+            return [
+              'Local Save Snaps',
+              'Media Saving',
+              'Screenshot Prevention',
+              'Send Snaps as Mobile',
+              'Unlimited File Size',
+              'Upload Image Snaps',
+              'Infinite Snap Rewatch',
+            ].includes(effectiveSettingName);
           });
           break;
         case 'presence-privacy':
           filteredSettings = allSettings.filter((setting: SettingModule) => {
-            const effectiveSettingName = (Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : setting.name ?? '') as string;
-            return ['Bitmoji Presence', 'Presence Logging', 'View Private Stories', 'Disable Telemetry', 'Disable Metrics'].includes(effectiveSettingName);
+            const effectiveSettingName = (
+              Array.isArray(setting.name) ? (setting.name.length > 0 ? setting.name[0] : '') : (setting.name ?? '')
+            ) as string;
+            return [
+              'Bitmoji Presence',
+              'Presence Logging',
+              'Message Logging',
+              'Detailed Message Logging',
+              'View Private Stories',
+              'Disable Telemetry',
+              'Disable Metrics',
+            ].includes(effectiveSettingName);
           });
           break;
         default:
@@ -76,14 +109,14 @@ function SettingsTabs({ allSettings }: SettingsTabsProps) {
   return (
     <Tabs defaultValue="general" className="settingsTabs">
       <Tabs.List className="settingsTabList">
-        {filteredTabConfigurations.map(tab => (
+        {filteredTabConfigurations.map((tab) => (
           <Tabs.Tab key={tab.value} value={tab.value} className="settingsTab">
             {tab.label}
           </Tabs.Tab>
         ))}
       </Tabs.List>
 
-      {filteredTabConfigurations.map(tab => (
+      {filteredTabConfigurations.map((tab) => (
         <Tabs.Panel key={tab.value} value={tab.value} className="settingsTabPanel">
           <div className="modalSettings">
             {tab.settings.map((setting: SettingModule) => {
