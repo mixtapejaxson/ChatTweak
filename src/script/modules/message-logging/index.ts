@@ -41,7 +41,7 @@ class MessageLogging extends Module {
   private conversationUnsubscribers: Map<string, () => void> = new Map();
   private messagingUnsubscriber: (() => void) | null = null;
 
-  // Proxied functions
+  // Proxied based functions
   private originalSendMessage: any = null;
   private originalUpdateMessage: any = null;
   private originalDeleteMessage: any = null;
