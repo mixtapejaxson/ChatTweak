@@ -79,9 +79,18 @@ class TelemetryBlocker extends Module {
         }
 
 
-        if (url.includes(SPOTLIGHT_URL) && blockSpotlight) {
-          logInfo('Blocked Spotlight request:', url);
-          return new Response(null, { status: 204 }); // Return a successful but empty response
+        try {
+          const parsedUrl = new URL(url, window.location.origin);
+          if (
+            parsedUrl.origin === 'https://web.snapchat.com' &&
+            parsedUrl.pathname.startsWith('/context/spotlight') &&
+            blockSpotlight
+          ) {
+            logInfo('Blocked Spotlight request:', url);
+            return new Response(null, { status: 204 }); // Return a successful but empty response
+          }
+        } catch (e) {
+          // If URL parsing fails, do not block (fail open).
         }
 
         return this.originalFetch!(input, init);
@@ -103,9 +112,18 @@ class TelemetryBlocker extends Module {
           logInfo('Blocked XHR telemetry/metrics request:', urlString);
           return;
         }
-        if (urlString.includes(SPOTLIGHT_URL) && blockSpotlight) {
-          logInfo('Blocked XHR Spotlight request:', urlString);
-          return;
+        try {
+          const parsedUrl = new URL(urlString, window.location.origin);
+          if (
+            parsedUrl.origin === 'https://web.snapchat.com' &&
+            parsedUrl.pathname.startsWith('/context/spotlight') &&
+            blockSpotlight
+          ) {
+            logInfo('Blocked XHR Spotlight request:', urlString);
+            return;
+          }
+        } catch (e) {
+          // If URL parsing fails, do not block (fail open).
         }
 
         const effectiveAsync = async !== undefined ? async : true;
