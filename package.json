@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/mixtapejaxson/ChatTweak#readme",
   "dependencies": {
-    "@mantine/core": "^8.0.1",
+    "@mantine/core": "^8.3.5",
     "@mantine/hooks": "^8.0.1",
     "@tabler/icons-react": "^3.33.0",
     "cookies-js": "^1.2.3",
