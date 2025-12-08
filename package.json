@@ -44,7 +44,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.29.0",
-    "@types/chrome": "^0.1.9",
+    "@types/chrome": "^0.1.32",
     "@types/lodash.throttle": "^4.1.9",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
