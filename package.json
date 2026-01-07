@@ -36,7 +36,7 @@
     "fast-deep-equal": "^3.1.3",
     "fuse.js": "^7.0.0",
     "lodash.throttle": "^4.1.1",
-    "preact": "^10.26.9",
+    "preact": "^10.28.2",
     "react": "npm:@preact/compat",
     "react-dom": "npm:@preact/compat",
     "uuid": "^13.0.0"
