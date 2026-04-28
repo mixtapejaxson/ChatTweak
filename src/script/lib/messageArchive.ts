@@ -8,19 +8,22 @@ import { getSnapchatStore } from '../utils/snapchat';
 const STORAGE_KEY = 'message_archive_v1';
 const UPDATED_EVENT = 'updated';
 const MAX_TEXT_LENGTH = 800;
+const MAX_PROTOBUF_DEPTH = 4;
+const MAX_BINARY_SCAN_BYTES = 64 * 1024;
+const textDecoder = new TextDecoder();
 
 export interface ArchivedMessage {
   id: string;
   conversationId: string;
   conversationTitle: string;
-  authorId: string | null;
-  authorName: string | null;
-  direction: string | null;
-  text: string | null;
-  contentType: string | number | null;
-  savePolicy: number | null;
-  createdAt: string | null;
-  deletedAt: string | null;
+  authorId: string;
+  authorName: string;
+  direction: string;
+  text: string;
+  contentType: string | number;
+  savePolicy: number;
+  createdAt: string;
+  deletedAt?: string;
   lastSeenAt: string;
 }
 
@@ -72,10 +75,45 @@ function normalizeArchive(value: any): MessageArchiveStore {
     return createEmptyArchive();
   }
 
+  const conversations = typeof value.conversations === 'object' && value.conversations != null ? value.conversations : {};
+  for (const conversation of Object.values(conversations) as ArchivedConversation[]) {
+    if (conversation == null || typeof conversation !== 'object' || conversation.messages == null) {
+      continue;
+    }
+
+    for (const message of Object.values(conversation.messages) as ArchivedMessage[]) {
+      if (message == null || typeof message !== 'object') {
+        continue;
+      }
+
+      const lastSeenAt = toIsoDate(message.lastSeenAt) ?? new Date().toISOString();
+      const createdAt = toIsoDate(message.createdAt) ?? lastSeenAt;
+      const direction =
+        firstString(message.direction) ??
+        (message.authorName === 'You' ? 'OUTGOING' : null) ??
+        'UNKNOWN';
+      const authorId = firstString(message.authorId) ?? 'Unknown sender';
+      const authorName =
+        firstString(message.authorName) ??
+        fallbackAuthorName(direction, firstString(message.conversationTitle) ?? 'Direct Chat') ??
+        authorId;
+
+      message.authorId = authorId;
+      message.authorName = authorName;
+      message.direction = direction;
+      message.text = sanitizeArchivedText(message.text) ?? '';
+      message.contentType = message.contentType ?? 'unknown';
+      message.savePolicy = firstNumber(message.savePolicy) ?? -1;
+      message.createdAt = createdAt;
+      message.deletedAt = toIsoDate(message.deletedAt) ?? undefined;
+      message.lastSeenAt = lastSeenAt;
+    }
+  }
+
   return {
     version: 1,
     updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : new Date().toISOString(),
-    conversations: typeof value.conversations === 'object' && value.conversations != null ? value.conversations : {},
+    conversations,
   };
 }
 
@@ -118,9 +156,351 @@ function toIsoDate(value: any): string | null {
   return null;
 }
 
-function extractText(value: any, seen = new WeakSet<object>()): string | null {
+function looksLikeOpaqueId(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value.trim());
+}
+
+function looksLikeStructuredToken(value: string): boolean {
+  const trimmed = value.trim();
+  if (trimmed.length < 16) {
+    return false;
+  }
+
+  if (/^\d+:[0-9a-f-]{24,}:\d+:\d+:\d+$/i.test(trimmed)) {
+    return true;
+  }
+
+  if (/^[0-9a-f:-]{24,}$/i.test(trimmed) && !/\s/.test(trimmed)) {
+    return true;
+  }
+
+  return false;
+}
+
+function looksLikeEncodedBlob(value: string): boolean {
+  const trimmed = value.trim();
+  if (trimmed.length < 16) {
+    return false;
+  }
+
+  if (trimmed.includes('\uFFFD')) {
+    return true;
+  }
+
+  const compact = trimmed.replace(/\s+/g, '');
+  if (/^[A-Za-z0-9+/=,]+$/.test(compact)) {
+    const base64LikeChunks = trimmed
+      .split(/[\s,]+/)
+      .filter(Boolean)
+      .filter((chunk) => /^[A-Za-z0-9+/=]+$/.test(chunk) && chunk.length >= 12);
+
+    if (base64LikeChunks.length > 0) {
+      const coveredLength = base64LikeChunks.reduce((total, chunk) => total + chunk.length, 0);
+      if (coveredLength / compact.length > 0.7) {
+        return true;
+      }
+    }
+  }
+
+  const symbolCount = (trimmed.match(/[^A-Za-z0-9\s]/g) ?? []).length;
+  const upperCount = (trimmed.match(/[A-Z]/g) ?? []).length;
+  const lowerCount = (trimmed.match(/[a-z]/g) ?? []).length;
+  const digitCount = (trimmed.match(/\d/g) ?? []).length;
+  const whitespaceCount = (trimmed.match(/\s/g) ?? []).length;
+
+  if (whitespaceCount <= 1 && digitCount > 0 && symbolCount > 0 && upperCount + lowerCount + digitCount > 20) {
+    return true;
+  }
+
+  if (lowerCount <= 2 && whitespaceCount <= 1 && trimmed.length >= 20) {
+    return true;
+  }
+
+  return false;
+}
+
+function normalizeToken(value: string): string {
+  return value
+    .replace(/\uFFFD+/g, ' ')
+    .replace(/^[^A-Za-z0-9'"]+|[^A-Za-z0-9'".!?]+$/g, '')
+    .trim();
+}
+
+function isLikelyJunkToken(value: string): boolean {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    return true;
+  }
+
+  const normalized = normalizeToken(trimmed);
+  if (normalized.length === 0) {
+    return true;
+  }
+
+  if (looksLikeOpaqueId(normalized) || looksLikeStructuredToken(normalized) || looksLikeEncodedBlob(normalized)) {
+    return true;
+  }
+
+  if (/^[A-F0-9]{6,}$/i.test(normalized) && !/[aeiou]/i.test(normalized)) {
+    return true;
+  }
+
+  if (/^[()$*`=;+\/\\_-]+$/.test(normalized)) {
+    return true;
+  }
+
+  const letterCount = (normalized.match(/[A-Za-z]/g) ?? []).length;
+  const digitCount = (normalized.match(/\d/g) ?? []).length;
+  const symbolCount = (normalized.match(/[^A-Za-z0-9\s]/g) ?? []).length;
+  if (letterCount === 0 && digitCount <= 2) {
+    return true;
+  }
+
+  if (digitCount > 0 && symbolCount > 0 && letterCount <= 2) {
+    return true;
+  }
+
+  return false;
+}
+
+function extractReadableSegment(value: string): string | null {
+  const cleaned = value
+    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]+/g, ' ')
+    .replace(/\uFFFD+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (cleaned.length === 0) {
+    return null;
+  }
+
+  const segments = cleaned
+    .split(/\s+/)
+    .reduce<string[]>((result, token) => {
+      if (isLikelyJunkToken(token)) {
+        result.push('\n');
+        return result;
+      }
+
+      const normalized = normalizeToken(token);
+      if (normalized.length === 0) {
+        result.push('\n');
+        return result;
+      }
+
+      result.push(normalized);
+      return result;
+    }, [])
+    .join(' ')
+    .split(/\s*\n\s*/)
+    .map((segment) => segment.replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+
+  if (segments.length === 0) {
+    return null;
+  }
+
+  segments.sort((left, right) => scoreTextCandidate(right) - scoreTextCandidate(left));
+  return segments[0] ?? null;
+}
+
+function isHumanReadableText(value: string): boolean {
+  const trimmed = value.trim();
+  if (
+    trimmed.length === 0 ||
+    looksLikeOpaqueId(trimmed) ||
+    looksLikeStructuredToken(trimmed) ||
+    looksLikeEncodedBlob(trimmed)
+  ) {
+    return false;
+  }
+
+  return /[A-Za-z]/.test(trimmed) || /\s/.test(trimmed);
+}
+
+function sanitizeArchivedText(value: string | null | undefined): string | null {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const trimmed = extractReadableSegment(value)?.slice(0, MAX_TEXT_LENGTH) ?? null;
+  return trimmed != null && isHumanReadableText(trimmed) ? trimmed : null;
+}
+
+function toUint8Array(value: any): Uint8Array | null {
+  if (value instanceof Uint8Array) {
+    return value;
+  }
+
+  if (value instanceof ArrayBuffer) {
+    return new Uint8Array(value);
+  }
+
+  if (ArrayBuffer.isView(value)) {
+    return new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+  }
+
+  if (Array.isArray(value) && value.every((entry) => typeof entry === 'number' && entry >= 0 && entry <= 255)) {
+    return new Uint8Array(value);
+  }
+
+  return null;
+}
+
+function scoreTextCandidate(value: string): number {
+  let score = value.length;
+  if (/\s/.test(value)) {
+    score += 20;
+  }
+  if (/[.!?]/.test(value)) {
+    score += 10;
+  }
+  if (/^[A-Z]/.test(value)) {
+    score += 5;
+  }
+  if (/https?:\/\//i.test(value)) {
+    score -= 5;
+  }
+  if (/^[\w-]+$/.test(value)) {
+    score -= 15;
+  }
+  if (looksLikeEncodedBlob(value)) {
+    score -= 1000;
+  }
+  return score;
+}
+
+function decodeBinaryText(bytes: Uint8Array): string | null {
+  if (bytes.length === 0 || bytes.length > MAX_BINARY_SCAN_BYTES) {
+    return null;
+  }
+
+  const raw = textDecoder.decode(bytes);
+  const replacementCount = (raw.match(/\uFFFD/g) ?? []).length;
+  if (replacementCount > Math.max(2, raw.length / 8)) {
+    return null;
+  }
+
+  const cleaned = raw.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]+/g, ' ').trim();
+  const printableCount = (cleaned.match(/[A-Za-z0-9\s.,!?'"@#$%^&*()_+=:;/\\-]/g) ?? []).length;
+  if (cleaned.length === 0 || printableCount / cleaned.length < 0.85) {
+    return null;
+  }
+
+  return sanitizeArchivedText(cleaned);
+}
+
+function readVarint(bytes: Uint8Array, start: number): { value: number; next: number } | null {
+  let value = 0;
+  let shift = 0;
+  let offset = start;
+
+  while (offset < bytes.length && shift < 35) {
+    const byte = bytes[offset];
+    value |= (byte & 0x7f) << shift;
+    offset += 1;
+
+    if ((byte & 0x80) === 0) {
+      return { value, next: offset };
+    }
+
+    shift += 7;
+  }
+
+  return null;
+}
+
+function collectBinaryTextCandidates(bytes: Uint8Array, depth = 0, candidates: string[] = []): string[] {
+  if (depth > MAX_PROTOBUF_DEPTH || bytes.length === 0 || bytes.length > MAX_BINARY_SCAN_BYTES) {
+    return candidates;
+  }
+
+  const directText = decodeBinaryText(bytes);
+  if (directText != null) {
+    candidates.push(directText);
+  }
+
+  let offset = 0;
+  while (offset < bytes.length) {
+    const tag = readVarint(bytes, offset);
+    if (tag == null) {
+      break;
+    }
+
+    offset = tag.next;
+    const wireType = tag.value & 0x7;
+
+    if (wireType === 0) {
+      const value = readVarint(bytes, offset);
+      if (value == null) {
+        break;
+      }
+      offset = value.next;
+      continue;
+    }
+
+    if (wireType === 1) {
+      offset += 8;
+      continue;
+    }
+
+    if (wireType === 2) {
+      const length = readVarint(bytes, offset);
+      if (length == null) {
+        break;
+      }
+
+      offset = length.next;
+      const end = offset + length.value;
+      if (length.value < 0 || end > bytes.length) {
+        break;
+      }
+
+      const nested = bytes.subarray(offset, end);
+      const nestedText = decodeBinaryText(nested);
+      if (nestedText != null) {
+        candidates.push(nestedText);
+      }
+      collectBinaryTextCandidates(nested, depth + 1, candidates);
+      offset = end;
+      continue;
+    }
+
+    if (wireType === 5) {
+      offset += 4;
+      continue;
+    }
+
+    break;
+  }
+
+  return candidates;
+}
+
+function extractTextFromBinary(value: any): string | null {
+  const bytes = toUint8Array(value);
+  if (bytes == null) {
+    return null;
+  }
+
+  const uniqueCandidates = Array.from(new Set(collectBinaryTextCandidates(bytes).map((candidate) => candidate.trim())));
+  uniqueCandidates.sort((left, right) => scoreTextCandidate(right) - scoreTextCandidate(left));
+  return uniqueCandidates[0] ?? null;
+}
+
+function extractText(value: any, seen = new WeakSet<object>(), preferred = false): string | null {
   if (typeof value === 'string') {
-    return value.trim().slice(0, MAX_TEXT_LENGTH) || null;
+    const trimmed = value.trim().slice(0, MAX_TEXT_LENGTH);
+    if (trimmed.length === 0 || looksLikeOpaqueId(trimmed) || looksLikeStructuredToken(trimmed)) {
+      return null;
+    }
+
+    return preferred || isHumanReadableText(trimmed) ? trimmed : null;
+  }
+
+  const binaryText = extractTextFromBinary(value);
+  if (binaryText != null) {
+    return binaryText;
   }
 
   if (value == null || typeof value !== 'object') {
@@ -136,15 +516,19 @@ function extractText(value: any, seen = new WeakSet<object>()): string | null {
   const preferredKeys = ['text', 'displayText', 'body', 'caption', 'message', 'content'];
   for (const key of preferredKeys) {
     if (key in value) {
-      const candidate = extractText(value[key], seen);
+      const candidate = extractText(value[key], seen, true);
       if (candidate != null) {
         return candidate;
       }
     }
   }
 
-  for (const nestedValue of Object.values(value)) {
-    const candidate = extractText(nestedValue, seen);
+  for (const [nestedKey, nestedValue] of Object.entries(value)) {
+    if (/(^|_|-)(id|ids|uuid|token|key)($|_|-)/i.test(nestedKey) || /(conversation|message|sender|author)id/i.test(nestedKey)) {
+      continue;
+    }
+
+    const candidate = extractText(nestedValue, seen, false);
     if (candidate != null) {
       return candidate;
     }
@@ -169,9 +553,19 @@ function extractAuthorName(message: any): string | null {
     message?.senderDisplayName,
     message?.senderUsername,
     message?.authorName,
-    message?.displayName,
-    message?.username,
   );
+}
+
+function fallbackAuthorName(direction: string | null, conversationTitle: string): string | null {
+  if (direction === 'OUTGOING') {
+    return 'You';
+  }
+
+  if (conversationTitle.trim().length > 0 && conversationTitle !== 'Direct Chat') {
+    return conversationTitle;
+  }
+
+  return null;
 }
 
 function extractDirection(message: any): string | null {
@@ -195,25 +589,32 @@ function buildArchivedMessage(
   previous: ArchivedMessage | undefined,
 ): ArchivedMessage {
   const now = new Date().toISOString();
+  const direction = extractDirection(message) ?? previous?.direction ?? null;
+  const authorId = extractAuthorId(message) ?? previous?.authorId ?? 'Unknown sender';
+  const authorName =
+    extractAuthorName(message) ??
+    fallbackAuthorName(direction, conversationTitle) ??
+    previous?.authorName ??
+    authorId;
 
   return {
     id: messageId,
     conversationId,
     conversationTitle,
-    authorId: extractAuthorId(message) ?? previous?.authorId ?? null,
-    authorName: extractAuthorName(message) ?? previous?.authorName ?? null,
-    direction: extractDirection(message) ?? previous?.direction ?? null,
-    text: extractText(message) ?? previous?.text ?? null,
-    contentType: message?.contentType ?? message?.messageType ?? previous?.contentType ?? null,
-    savePolicy: firstNumber(message?.savePolicy, previous?.savePolicy) ?? null,
+    authorId,
+    authorName,
+    direction: direction ?? 'UNKNOWN',
+    text: extractText(message) ?? previous?.text ?? '',
+    contentType: message?.contentType ?? message?.messageType ?? previous?.contentType ?? 'unknown',
+    savePolicy: firstNumber(message?.savePolicy, previous?.savePolicy) ?? -1,
     createdAt:
       toIsoDate(message?.createdAt) ??
       toIsoDate(message?.createdTimestamp) ??
       toIsoDate(message?.serverTimestamp) ??
       toIsoDate(message?.timestamp) ??
       previous?.createdAt ??
-      null,
-    deletedAt: previous?.deletedAt ?? null,
+      now,
+    deletedAt: previous?.deletedAt ?? undefined,
     lastSeenAt: now,
   };
 }
@@ -231,10 +632,14 @@ function downloadFile(filename: string, mimeType: string, content: string) {
 }
 
 function formatMessageLine(message: ArchivedMessage): string {
-  const timestamp = message.createdAt ?? message.lastSeenAt;
-  const author = message.authorName ?? message.authorId ?? message.direction ?? 'Unknown';
-  const status = message.deletedAt != null ? ' [deleted]' : '';
-  const body = message.text ?? `[content type: ${String(message.contentType ?? 'unknown')}]`;
+  const timestamp = message.createdAt || message.lastSeenAt;
+  const author = message.authorName || message.authorId || message.direction || 'Unknown';
+  const status = message.deletedAt ? ' [deleted]' : '';
+  const body =
+    (message.text.length > 0 ? message.text : null) ??
+    (message.deletedAt
+      ? '[deleted message body unavailable]'
+      : `[content type: ${String(message.contentType ?? 'unknown')}]`);
   return `- ${timestamp} | ${author}${status}: ${body}`;
 }
 
@@ -345,7 +750,7 @@ class MessageArchive {
           }
 
           const archivedMessage = archivedConversation.messages[previousId];
-          if (archivedMessage == null || archivedMessage.deletedAt != null) {
+          if (archivedMessage == null || archivedMessage.deletedAt) {
             continue;
           }
 
@@ -356,8 +761,8 @@ class MessageArchive {
           if (deleteLoggingEnabled) {
             logWarn(
               `Deleted message in ${archivedConversation.title}:`,
-              archivedMessage.authorName ?? archivedMessage.authorId ?? 'Unknown sender',
-              archivedMessage.text ?? `[content type: ${String(archivedMessage.contentType ?? 'unknown')}]`,
+              archivedMessage.authorName || archivedMessage.authorId || 'Unknown sender',
+              archivedMessage.text || `[content type: ${String(archivedMessage.contentType ?? 'unknown')}]`,
             );
           }
         }
