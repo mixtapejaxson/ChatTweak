@@ -35,7 +35,7 @@ function patchSendMessageWithContent(mananger: any) {
             // Ensure message.content is a Uint8Array before modification
             if (message.content instanceof ArrayBuffer) {
               message.content = new Uint8Array(message.content);
-            } else if (! (message.content instanceof Uint8Array)) {
+            } else if (!(message.content instanceof Uint8Array)) {
               // Attempt to convert to Uint8Array if it's a regular array or other type
               message.content = new Uint8Array(message.content);
             }

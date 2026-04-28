@@ -11,8 +11,6 @@ const DEFAULT_DESCRIPTION = 'Do what Snapchat normally does.';
 const AUTO_SAVE_NAME = 'Auto-Save Messages';
 const AUTO_SAVE_DESCRIPTION = 'Automatically save all messages to your history.';
 
-
-
 function ChatHandling_() {
   const [chatHandling, setChatHandling] = useSettingState('CHAT_HANDLING');
   return (
@@ -22,7 +20,6 @@ function ChatHandling_() {
         <Radio value={ChatHandling.AUTO_SAVE} label={AUTO_SAVE_NAME} description={AUTO_SAVE_DESCRIPTION} />
       </Stack>
     </Radio.Group>
-  
   );
 }
 
