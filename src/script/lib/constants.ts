@@ -42,6 +42,9 @@ export const SettingIds = {
   INFINITE_SNAP_REWATCH: 'INFINITE_SNAP_REWATCH',
   NO_READ_RECEIPTS: 'NO_READ_RECEIPTS',
   LOCAL_SAVE_SNAPS_CACHE_DURATION: 'LOCAL_SAVE_SNAPS_CACHE_DURATION', // New setting
+  MESSAGE_ARCHIVE: 'MESSAGE_ARCHIVE',
+  MESSAGE_DELETE_LOGGING: 'MESSAGE_DELETE_LOGGING',
+  MESSAGE_ARCHIVE_LIMIT: 'MESSAGE_ARCHIVE_LIMIT',
 } as const;
 
 export enum BitmojiPresence {
@@ -93,6 +96,9 @@ export const defaultSettingValues = {
   [SettingIds.INFINITE_SNAP_REWATCH]: false,
   [SettingIds.NO_READ_RECEIPTS]: false,
   [SettingIds.LOCAL_SAVE_SNAPS_CACHE_DURATION]: 0, // Default to 0 for "on refresh"
+  [SettingIds.MESSAGE_ARCHIVE]: true,
+  [SettingIds.MESSAGE_DELETE_LOGGING]: true,
+  [SettingIds.MESSAGE_ARCHIVE_LIMIT]: 5000,
 };
 
 export type SettingId = keyof typeof SettingIds;

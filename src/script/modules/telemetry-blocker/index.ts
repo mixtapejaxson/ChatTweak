@@ -1,36 +1,33 @@
 import Module from '../../lib/module';
 import settings from '../../lib/settings';
-import injectFunction from './workerInject'
+import injectFunction from './workerInject';
 import { SettingIds } from '../../lib/constants';
 import { logInfo } from '../../lib/debug';
 
-
 const METRICS_URL = 'https://gcp.api.snapchat.com/web/metrics';
 const SPOTLIGHT_URL = 'https://web.snapchat.com/context/spotlight';
-const SNAP_OPEN_URL = 'messagingcoreservice.MessagingCoreService/UpdateContentMessage'
+const SNAP_OPEN_URL = 'messagingcoreservice.MessagingCoreService/UpdateContentMessage';
 const BROADCAST_CHANNEL = new BroadcastChannel('ChatTweak');
-
 
 class TelemetryBlocker extends Module {
   private originalFetch: typeof window.fetch | null = null;
   private originalXhrOpen: typeof XMLHttpRequest.prototype.open | null = null;
-  
 
   constructor() {
     super('Telemetry Blocker');
 
     // injection into webworker, required to block certain requests
     const oldBlobClass = window.Blob;
-      window.Blob = class HookedBlob extends Blob {
-        constructor(...args: any[]) {
-          const data = args[0][0];
-          if (typeof data === "string" && data.startsWith("importScripts")) {
-            args[0][0] += `\n(${injectFunction})("${SNAP_OPEN_URL}", ${settings.getSetting("INFINITE_SNAP_REWATCH")}, ${settings.getSetting("NO_READ_RECEIPTS")});`;
-            window.Blob = oldBlobClass;
-          }
-          super(...args);
+    window.Blob = class HookedBlob extends Blob {
+      constructor(...args: any[]) {
+        const data = args[0][0];
+        if (typeof data === 'string' && data.startsWith('importScripts')) {
+          args[0][0] += `\n(${injectFunction})("${SNAP_OPEN_URL}", ${settings.getSetting('INFINITE_SNAP_REWATCH')}, ${settings.getSetting('NO_READ_RECEIPTS')});`;
+          window.Blob = oldBlobClass;
         }
-      };
+        super(...args);
+      }
+    };
 
     this.load = this.load.bind(this);
     this.enableBlocking = this.enableBlocking.bind(this);
@@ -52,19 +49,18 @@ class TelemetryBlocker extends Module {
     const infiniteRewatchSnap = settings.getSetting(SettingIds.INFINITE_SNAP_REWATCH);
     const unread = settings.getSetting(SettingIds.NO_READ_RECEIPTS);
 
-    logInfo(infiniteRewatchSnap, unread)
+    logInfo(infiniteRewatchSnap, unread);
 
     BROADCAST_CHANNEL.postMessage({ infiniteRewatchSnap: infiniteRewatchSnap, unread: unread });
 
     if (disableTelemetry || disableMetrics || blockSpotlight) {
       this.enableBlocking();
-    }  else {
+    } else {
       this.disableBlocking();
     }
   }
 
   enableBlocking() {
-
     if (this.originalFetch === null) {
       this.originalFetch = window.fetch;
       window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -77,7 +73,6 @@ class TelemetryBlocker extends Module {
           logInfo('Blocked telemetry/metrics request:', url);
           return new Response(null, { status: 204 }); // Return a successful but empty response
         }
-
 
         try {
           const parsedUrl = new URL(url, window.location.origin);
@@ -100,7 +95,13 @@ class TelemetryBlocker extends Module {
     if (this.originalXhrOpen === null) {
       this.originalXhrOpen = XMLHttpRequest.prototype.open;
       const _this = this; // Capture the instance's 'this'
-      XMLHttpRequest.prototype.open = function (method: string, url: string | URL, async?: boolean, username?: string | null, password?: string | null) {
+      XMLHttpRequest.prototype.open = function (
+        method: string,
+        url: string | URL,
+        async?: boolean,
+        username?: string | null,
+        password?: string | null,
+      ) {
         const urlString = typeof url === 'string' ? url : url.href;
         const disableTelemetry = settings.getSetting(SettingIds.DISABLE_TELEMETRY);
         const disableMetrics = settings.getSetting(SettingIds.DISABLE_METRICS);
