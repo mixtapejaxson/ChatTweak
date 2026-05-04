@@ -39,7 +39,7 @@
     "preact": "^10.26.9",
     "react": "npm:@preact/compat",
     "react-dom": "npm:@preact/compat",
-    "uuid": "^13.0.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
