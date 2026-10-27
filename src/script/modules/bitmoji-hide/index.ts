@@ -1,23 +1,35 @@
 import { BitmojiPresence } from '../../lib/constants';
 import settings from '../../lib/settings';
 import Module from '../../lib/module';
+import { logError } from '../../lib/debug';
 import { getSnapchatStore } from '../../utils/snapchat';
 
 const store = getSnapchatStore();
 
 let oldCreatePresenceSession: any = null;
-let newCreatePresenceSession: any = null;
+
+// Same result the web client returns when its presence service isn't initialized: no session, no-op cleanup.
+// Without a session nothing is published to the other participants, so no Bitmoji is shown.
+const newCreatePresenceSession = () => () => {};
 
 class BitmojiHide extends Module {
   constructor() {
     super('Bitmoji Hide');
-    store.subscribe((storeState: any) => storeState.talk, this.load.bind(this));
+    store?.subscribe(
+      (storeState: any) => storeState.presence,
+      () => this.load(),
+    );
     settings.on(`BITMOJI_PRESENCE.setting:update`, () => this.load());
   }
 
-  load(talkClient?: any) {
-    talkClient = talkClient ?? store.getState().talk;
-    if (talkClient?.client == null) {
+  load() {
+    if (store == null) {
+      logError('Bitmoji Hide: store not found');
+      return;
+    }
+
+    const presenceClient = store.getState().presence;
+    if (presenceClient == null) {
       return;
     }
 
@@ -25,31 +37,32 @@ class BitmojiHide extends Module {
     const enabled = bitmojiPresence === BitmojiPresence.HIDE;
     const changedValues: any = {};
 
-    if (enabled && talkClient.client.createPresenceSession !== newCreatePresenceSession) {
-      oldCreatePresenceSession = talkClient.client.createPresenceSession;
+    if (enabled && presenceClient.createPresenceSession !== newCreatePresenceSession) {
+      if (typeof presenceClient.createPresenceSession !== 'function') {
+        logError('Bitmoji Hide: presence.createPresenceSession not found');
+        return;
+      }
 
-      newCreatePresenceSession = new Proxy(oldCreatePresenceSession, {
-        apply: function (target: any, thisArg: any, args: any[]) {
-          const presenceSession = Reflect.apply(target, thisArg, args) as any;
-          presenceSession.activate = () => {};
-          return presenceSession;
-        },
-      });
-
+      oldCreatePresenceSession = presenceClient.createPresenceSession;
       changedValues.createPresenceSession = newCreatePresenceSession;
     }
 
     if (!enabled && oldCreatePresenceSession != null) {
       changedValues.createPresenceSession = oldCreatePresenceSession;
       oldCreatePresenceSession = null;
-      newCreatePresenceSession = null;
     }
 
     if (Object.keys(changedValues).length === 0) {
       return;
     }
 
-    store.setState({ talk: { ...talkClient, client: { ...talkClient.client, ...changedValues } } });
+    store.setState({ presence: { ...presenceClient, ...changedValues } });
+
+    // Sessions are only created when a chat opens, so end the one already running for the open chat.
+    // dispose() clears presence.presenceSession, so the client's own cleanup skips it later.
+    if (enabled) {
+      store.getState().presence.presenceSession?.dispose();
+    }
   }
 }
 
